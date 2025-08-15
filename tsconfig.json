@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": false,
     "declarationDir": "./types",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
