@@ -1,8 +1,8 @@
-import assert from "assert";
-import { test } from "@coder-ka/testing";
+import assert from "node:assert";
+import test from "node:test";
 import { createLLParser, parseError } from "../src";
 
-export const llParsingTest = test("ll-parsing").do(async () => {
+test("ll-parsing", async () => {
   const S = Symbol("S");
   const $ = Symbol("$");
   const llparser = createLLParser<{ value: string }>(
