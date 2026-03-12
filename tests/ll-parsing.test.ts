@@ -31,27 +31,30 @@ test("ll-parsing", async () => {
     },
     () => [S, $]
   );
+
+  const lexer = (async function* () {
+    yield {
+      tokens: ["a"],
+      index: 1,
+      line: 0,
+      inlineIndex: 1,
+    };
+    yield {
+      tokens: ["b"],
+      index: 2,
+      line: 0,
+      inlineIndex: 2,
+    };
+    yield {
+      tokens: ["c"],
+      index: 3,
+      line: 0,
+      inlineIndex: 3,
+    };
+  });
+
   const parsed = await llparser.parse(
-    (async function* () {
-      yield {
-        tokens: ["a"],
-        index: 1,
-        line: 0,
-        inlineIndex: 1,
-      };
-      yield {
-        tokens: ["b"],
-        index: 2,
-        line: 0,
-        inlineIndex: 2,
-      };
-      yield {
-        tokens: ["c"],
-        index: 3,
-        line: 0,
-        inlineIndex: 3,
-      };
-    })(),
+    lexer(),
     { value: "" }
   );
   assert.deepStrictEqual(parsed.stack, [$]);
