@@ -36,9 +36,9 @@ const ipv4Parser = createLLParser<{ value: string[] }>(
     [S]() {
       return [SEG, DOT, SEG, DOT, SEG, DOT, SEG]
     },
-    [SEG]: ([token], { index, line, inlineIndex }, result) => {
+    [SEG]: ([token], { index, line, inlineIndex }, state) => {
       if (ipv4SegmentRegex.test(token)) {
-        result.value.push(token);
+        state.value.push(token);
         return [token];
       } else {
         return [
@@ -87,7 +87,7 @@ const parsed = await ipv4Parser.parse(
   }
 );
 
-console.log(parsed.result.value); // ["127", "0", "0", "1"]
+console.log(parsed.state.value); // ["127", "0", "0", "1"]
 ```
 
 It might seem like overkill for just an IPv4 address, but by understanding the basics through this code, you'll be able to implement parsers for much larger codebases concisely.
@@ -173,9 +173,9 @@ Again, since there's a symbol `SEG` at the top of the stack, a state transition 
 
 ```ts
 {
-    [SEG]: ([token], { index, line, inlineIndex }, result) => {
+    [SEG]: ([token], { index, line, inlineIndex }, state) => {
       if (ipv4SegmentRegex.test(token)) {
-        result.value.push(token);
+        state.value.push(token);
         return [token];
       } else {
         return [
@@ -196,7 +196,7 @@ The symbol `SEG` corresponds to each segment (numeric part) of the IPv4 address.
 
 Therefore, it first validates whether the current token is a numeric part using `ipv4SegmentRegex` (`/\d+/`).
 
-If validation succeeds, it adds the token to the parsing result array `result.value` and returns an array.
+If validation succeeds, it adds the token to the parsing state array `state.value` and returns an array.
 
 As mentioned earlier, the returned array is pushed onto the top of the stack.
 
@@ -219,11 +219,11 @@ Current input stream value: ["."]
 
 This process repeats until the input stream is fully consumed, at which point parsing ends.
 
-The result is stored in the return value of the `parse` method.
+The state is stored in the return value of the `parse` method.
 
 ```ts
 parsed.stack // [$]
-parsed.result // { value: ["127", "0", "0", "1"] }
+parsed.state // { value: ["127", "0", "0", "1"] }
 parsed.errors // []
 ```
 
@@ -243,9 +243,9 @@ And when validating a token and advancing the input stream, you need to return t
 
 ```ts
 {
-    [SEG]: ([token], { index, line, inlineIndex }, result) => {
+    [SEG]: ([token], { index, line, inlineIndex }, state) => {
       if (ipv4SegmentRegex.test(token)) {
-        result.value.push(token);
+        state.value.push(token);
         return [token];
       } else {
         // ...omitted
@@ -306,7 +306,7 @@ Next, let's look at `rules`.
 ```ts
 createLLParser(
   rules: {
-    [S]([token], { index, line, inlineIndex }, result) {
+    [S]([token], { index, line, inlineIndex }, state) {
       return [];
     }
   },
@@ -318,7 +318,7 @@ As explained earlier, `rules` is an object.
 
 Keys are symbol values representing markers.
 
-Values are functions where the first argument is an array of lookahead tokens (for LL(1), an array of length 1), the second argument is information about the token's position in the source, and the third argument is a result object for including information such as an AST.
+Values are functions where the first argument is an array of lookahead tokens (for LL(1), an array of length 1), the second argument is information about the token's position in the source, and the third argument is a state object for including information such as an AST.
 
 The number of lookahead tokens is determined by the lexer implementation. Lexers are explained later.
 
@@ -348,7 +348,7 @@ has the following position information:
 
 These are useful for error reporting.
 
-The result object can be any shape you choose. For example, it can be `{ ast: YourLangAST }`.
+The state object can be any shape you choose. For example, it can be `{ ast: YourLangAST }`.
 
 Next, let's look at the `parse` method of the returned parser object.
 
@@ -363,12 +363,12 @@ Here is a simplified signature:
 ```ts
 const { parse } = createLLParser(...);
 
-parse(lexed, result, options);
+parse(lexed, state, options);
 ```
 
 `lexed` (the first argument) is the object output by the lexer. Details are provided later.
 
-The second argument is the initial value of the result object. As mentioned before, the contents of the result object are modified during parsing.
+The second argument is the initial value of the state object. As mentioned before, the contents of the state object are modified during parsing.
 
 The third argument is options for adjusting behavior. Its signature is:
 
@@ -393,14 +393,14 @@ The `parse` method returns:
 Promise<{
   stack: TStack;
   errors: ParseError[];
-  result: TResult;
+  state: TState;
   index: number;
 }>
 ```
 
 - `stack`: The final stack.
 - `errors`: A list of errors that occurred. If the `onError` option is not `continue`, there will be at most one.
-- `result`: The result object.
+- `state`: The state object.
 - `index`: The final index position.
 
 You can use this information to see if parsing succeeded or to retrieve the AST.

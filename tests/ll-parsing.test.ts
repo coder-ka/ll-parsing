@@ -7,14 +7,14 @@ test("ll-parsing", async () => {
   const $ = Symbol("$");
   const llparser = createLLParser<{ value: string }>(
     {
-      [S]: ([token], { index, line, inlineIndex }, result) => {
+      [S]: ([token], { index, line, inlineIndex }, state) => {
         if (token === "a") {
-          result.value = "a" + result.value;
+          state.value = "a" + state.value;
           return ["a", S];
         } else if (token === "b") {
           return ["b", S];
         } else if (token === "c") {
-          result.value = "c" + result.value;
+          state.value = "c" + state.value;
           return ["c"];
         } else {
           return [
@@ -59,5 +59,5 @@ test("ll-parsing", async () => {
   );
   assert.deepStrictEqual(parsed.stack, [$]);
   assert.deepStrictEqual(parsed.errors, []);
-  assert.strictEqual(parsed.result.value, "ca");
+  assert.strictEqual(parsed.state.value, "ca");
 });

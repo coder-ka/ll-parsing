@@ -1,7 +1,7 @@
 {
   "name": "@coder-ka/ll-parsing",
-  "version": "1.0.2",
-  "description": "",
+  "version": "1.0.3",
+  "description": "ll-parsing is a lightweight library for creating LL(k) parsers.",
   "main": "./dist/index.cjs",
   "exports": {
     ".": {

@@ -16,24 +16,24 @@ export type ParseOptions = {
   onError: "stop" | "throw" | "continue";
   debug?: boolean;
 };
-export function createLLParser<TResult, TStack extends Stack = Stack>(
+export function createLLParser<TState, TStack extends Stack = Stack>(
   rules: Record<
     symbol,
-    (tokens: string[], position: TokenPosition, result: TResult) => TStack
+    (tokens: string[], position: TokenPosition, state: TState) => TStack
   >,
   initStack: () => TStack
 ) {
   return {
     async parse(
       inputBuffer: InputBeffer,
-      result: TResult,
+      state: TState,
       options: ParseOptions = {
         onError: "stop",
       }
     ): Promise<{
       stack: TStack;
       errors: ParseError[];
-      result: TResult;
+      state: TState;
       index: number;
     }> {
       const stack = initStack();
@@ -63,7 +63,7 @@ export function createLLParser<TResult, TStack extends Stack = Stack>(
                   line,
                   inlineIndex,
                 },
-                result
+                state
               )
             );
           }
@@ -87,7 +87,7 @@ export function createLLParser<TResult, TStack extends Stack = Stack>(
               return {
                 stack,
                 errors,
-                result,
+                state,
                 index,
               };
             } else if (options.onError === "throw") {
@@ -100,7 +100,7 @@ export function createLLParser<TResult, TStack extends Stack = Stack>(
         return {
           stack,
           errors,
-          result,
+          state,
           index: lastIndex,
         };
       } catch (error) {

@@ -13,9 +13,9 @@ test("ipv4", async () => {
       [S]() {
         return [SEG, DOT, SEG, DOT, SEG, DOT, SEG]
       },
-      [SEG]: ([token], { index, line, inlineIndex }, result) => {
+      [SEG]: ([token], { index, line, inlineIndex }, state) => {
         if (ipv4SegmentRegex.test(token)) {
-          result.value.push(token);
+          state.value.push(token);
           return [token];
         } else {
           return [
@@ -66,7 +66,7 @@ test("ipv4", async () => {
 
   assert.deepStrictEqual(parsed.stack, [$]);
   assert.deepStrictEqual(parsed.errors, []);
-  assert.deepStrictEqual(parsed.result.value, [
+  assert.deepStrictEqual(parsed.state.value, [
     "127",
     "0",
     "0",
